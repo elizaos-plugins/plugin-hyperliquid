@@ -78,6 +78,7 @@ var spotTrade = {
     return !!runtime.getSetting("HYPERLIQUID_PRIVATE_KEY");
   },
   handler: async (runtime, message, state, _options, callback) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     try {
       const currentState = !state ? await runtime.composeState(message) : await runtime.updateRecentMessageState(state);
       const context = composeContext({
@@ -176,14 +177,14 @@ var spotTrade = {
       };
       elizaLogger.info("Placing order:", orderRequest);
       const result = await sdk.exchange.placeOrder(orderRequest);
-      if (result.status === "ok" && result.response?.type === "order" && result.response.data?.statuses?.[0]?.error) {
+      if (result.status === "ok" && ((_a = result.response) == null ? void 0 : _a.type) === "order" && ((_d = (_c = (_b = result.response.data) == null ? void 0 : _b.statuses) == null ? void 0 : _c[0]) == null ? void 0 : _d.error)) {
         throw new HyperliquidError(
           result.response.data.statuses[0].error
         );
       }
       if (callback) {
         const action = validatedOrder.is_buy ? "buy" : "sell";
-        const executionPrice = result.response?.data?.statuses?.[0]?.px || rounded_px;
+        const executionPrice = ((_h = (_g = (_f = (_e = result.response) == null ? void 0 : _e.data) == null ? void 0 : _f.statuses) == null ? void 0 : _g[0]) == null ? void 0 : _h.px) || rounded_px;
         callback({
           text: `Successfully placed ${isMarketOrder ? "a market" : "a limit"} order to ${action} ${validatedOrder.sz} ${validatedOrder.coin} at ${executionPrice}`,
           content: result
@@ -273,7 +274,7 @@ var priceCheck = {
         context,
         modelClass: ModelClass2.SMALL
       });
-      if (!content?.symbol) {
+      if (!(content == null ? void 0 : content.symbol)) {
         throw new HyperliquidError(
           "Could not determine which token price to check"
         );
@@ -370,6 +371,7 @@ var cancelOrders = {
     return !!runtime.getSetting("HYPERLIQUID_PRIVATE_KEY");
   },
   handler: async (runtime, _message, _state, _options, callback) => {
+    var _a, _b, _c;
     try {
       const sdk = new Hyperliquid3({
         privateKey: runtime.getSetting("HYPERLIQUID_PRIVATE_KEY"),
@@ -381,7 +383,7 @@ var cancelOrders = {
       const result = await sdk.custom.cancelAllOrders();
       elizaLogger3.info("Cancel result:", result);
       if (callback) {
-        const cancelledCount = result?.response?.data?.statuses?.length || 0;
+        const cancelledCount = ((_c = (_b = (_a = result == null ? void 0 : result.response) == null ? void 0 : _a.data) == null ? void 0 : _b.statuses) == null ? void 0 : _c.length) || 0;
         callback({
           text: cancelledCount > 0 ? `Successfully cancelled ${cancelledCount} open order${cancelledCount > 1 ? "s" : ""}` : "No open orders to cancel",
           content: result
